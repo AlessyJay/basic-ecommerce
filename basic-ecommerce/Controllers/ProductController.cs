@@ -1,13 +1,14 @@
 ﻿using basic_ecommerce.Dto;
 using basic_ecommerce.Interfaces;
 using basic_ecommerce.Models;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace basic_ecommerce.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProductController(IProductService productService) : ControllerBase
     {
         [HttpGet("{userId}")]

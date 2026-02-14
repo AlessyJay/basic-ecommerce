@@ -1,8 +1,10 @@
 ﻿using basic_ecommerce.Dto;
 using basic_ecommerce.Interfaces;
 using basic_ecommerce.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace basic_ecommerce.Controllers
 {
@@ -33,9 +35,28 @@ namespace basic_ecommerce.Controllers
         [HttpPost("refresh-tokens")]
         public async Task<ActionResult<TokenResponse>> RefreshToken(RefreshTokenRequest req)
         {
-            var result = await authService.RefreshTokenAsync(req);
+            var refreshToken = Request.Cookies["refreshToken"];
 
-            if (result is null || result.AccessToken is null || result.RefreshToken is null) return Unauthorized(result);
+            if (refreshToken is null) return Unauthorized();
+
+            var result = await authService.RefreshTokenAsync(req, refreshToken);
+
+            if (result is null) return Unauthorized();
+
+            return Ok(result);
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult<MeDto>> Me()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId is null) return Unauthorized();
+
+            var result = await authService.GetMyInfo(Guid.Parse(userId));
+
+            if (result is null) return NotFound();
 
             return Ok(result);
         }

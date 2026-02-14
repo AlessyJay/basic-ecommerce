@@ -13,7 +13,7 @@ using System.Text;
 
 namespace basic_ecommerce.Services
 {
-    public class AuthService(AppDbContext context, IConfiguration config) : IAuthService
+    public class AuthService(AppDbContext context, IConfiguration config, IHttpContextAccessor httpContext) : IAuthService
     {
         private string CreateToken(User req)
         {
@@ -49,6 +49,19 @@ namespace basic_ecommerce.Services
             return Convert.ToBase64String(random);
         }
 
+        private void SetRefreshTokenCookie(string refreshToken)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddDays(30)
+            };
+
+            httpContext.HttpContext!.Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+        }
+
         private async Task<string> GenerateAndSaveRefreshTokenAsync(User req)
         {
             var refreshToken = GenerateRefreshToken();
@@ -56,6 +69,8 @@ namespace basic_ecommerce.Services
             req.RefreshExpiresAt = DateTimeOffset.UtcNow.AddDays(30);
 
             await context.SaveChangesAsync();
+
+            SetRefreshTokenCookie(refreshToken);
 
             return refreshToken;
         }
@@ -87,14 +102,12 @@ namespace basic_ecommerce.Services
 
             if (user == null) return null!;
 
-            string token = CreateToken(user);
-
             return await CreateTokenResponse(user);
         }
 
-        public async Task<TokenResponse?> RefreshTokenAsync(RefreshTokenRequest req)
+        public async Task<TokenResponse?> RefreshTokenAsync(RefreshTokenRequest req, string refreshToken)
         {
-            var user = await ValidateRefreshTokenAsync(req.userId, req.RefreshToken);
+            var user = await ValidateRefreshTokenAsync(req.userId, refreshToken);
 
             if (user is null)
             {
@@ -120,6 +133,22 @@ namespace basic_ecommerce.Services
             await context.SaveChangesAsync();
 
             return user;
+        }
+
+        public async Task<MeDto?> GetMyInfo(Guid userId)
+        {
+            var user = await context.users.FindAsync(userId);
+
+            if (user is null) return null;
+
+            return new MeDto
+            {
+                firstName = user.firstName,
+                lastName = user.lastName,
+                email = user.email,
+                joinedAt = user.joinedAt,
+                updateAt = user.updatedAt
+            };
         }
     }
 }
