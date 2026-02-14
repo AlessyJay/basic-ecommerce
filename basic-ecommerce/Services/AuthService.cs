@@ -129,6 +129,8 @@ namespace basic_ecommerce.Services
 
             user.email = req.email;
             user.password = hashPassword;
+            user.firstName = req.firstName;
+            user.lastName = req.lastName;
 
             context.users.Add(user);
 
