@@ -105,9 +105,11 @@ namespace basic_ecommerce.Services
             return await CreateTokenResponse(user);
         }
 
-        public async Task<TokenResponse?> RefreshTokenAsync(RefreshTokenRequest req, string refreshToken)
+        public async Task<TokenResponse?> RefreshTokenAsync(string refreshToken)
         {
-            var user = await ValidateRefreshTokenAsync(req.userId, refreshToken);
+            var userId = await context.users.FirstOrDefaultAsync(t => t.refreshToken == refreshToken);
+
+            var user = await ValidateRefreshTokenAsync(userId!.Id, refreshToken);
 
             if (user is null)
             {

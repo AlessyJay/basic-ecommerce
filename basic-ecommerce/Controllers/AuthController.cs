@@ -33,13 +33,13 @@ namespace basic_ecommerce.Controllers
         }
 
         [HttpPost("refresh-tokens")]
-        public async Task<ActionResult<TokenResponse>> RefreshToken(RefreshTokenRequest req)
+        public async Task<ActionResult<TokenResponse>> RefreshToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
 
             if (refreshToken is null) return Unauthorized();
 
-            var result = await authService.RefreshTokenAsync(req, refreshToken);
+            var result = await authService.RefreshTokenAsync(refreshToken);
 
             if (result is null) return Unauthorized();
 

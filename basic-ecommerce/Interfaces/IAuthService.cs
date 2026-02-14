@@ -7,7 +7,7 @@ namespace basic_ecommerce.Interfaces
     {
         Task<User?> RegisterAsync(RegisterDto req);
         Task<TokenResponse?> LoginAsync(LoginDto req);
-        Task<TokenResponse?> RefreshTokenAsync(RefreshTokenRequest req, string refreshToken);
+        Task<TokenResponse?> RefreshTokenAsync(string refreshToken);
         Task<MeDto?> GetMyInfo(Guid userId);
     }
 }
