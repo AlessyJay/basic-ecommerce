@@ -55,7 +55,7 @@ namespace basic_ecommerce.Services
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Lax,
+                SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(30)
             };
 
@@ -68,7 +68,7 @@ namespace basic_ecommerce.Services
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Lax,
+                SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddMinutes(2),
                 Path = "/"
             };
