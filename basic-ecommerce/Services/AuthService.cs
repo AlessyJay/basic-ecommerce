@@ -62,6 +62,20 @@ namespace basic_ecommerce.Services
             httpContext.HttpContext!.Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
 
+        private void SetAccessTokenCookie(string accessToken)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(2),
+                Path = "/"
+            };
+
+            httpContext.HttpContext!.Response.Cookies.Append("accessToken", accessToken, cookieOptions);
+        }
+
         private async Task<string> GenerateAndSaveRefreshTokenAsync(User req)
         {
             var refreshToken = GenerateRefreshToken();
@@ -89,9 +103,12 @@ namespace basic_ecommerce.Services
 
         private async Task<TokenResponse> CreateTokenResponse(User user)
         {
+            var accessToken = CreateToken(user);
+            SetAccessTokenCookie(accessToken);
+
             return new TokenResponse
             {
-                AccessToken = CreateToken(user),
+                AccessToken = accessToken,
                 RefreshToken = await GenerateAndSaveRefreshTokenAsync(user)
             };
         }
